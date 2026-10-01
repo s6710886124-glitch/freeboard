@@ -1,1 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Farm Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
 
+  <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center border-b border-slate-800 pb-4">
+    <div>
+      <h1 class="text-3xl font-bold text-emerald-400 flex items-center gap-3">
+        <i class="fa-solid fa-leaf"></i> Smart Farm Monitoring Dashboard
+      </h1>
+      <p class="text-slate-400 text-sm mt-1">ระบบเฝ้าระวังและวิเคราะห์สภาพแวดล้อมแบบ Real-time</p>
+    </div>
+    <div class="mt-4 md:mt-0 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+      </span>
+      <span class="text-xs text-slate-300 font-mono" id="last-update">กำลังรอข้อมูล...</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">อุณหภูมิ (Temperature)</p>
+            <h2 class="text-3xl font-extrabold text-amber-400 mt-1" id="val-temp">-- <span class="text-lg">°C</span></h2>
+          </div>
+          <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400">
+            <i class="fa-solid fa-temperature-high text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">ความชื้น (Humidity)</p>
+            <h2 class="text-3xl font-extrabold text-blue-400 mt-1" id="val-hum">-- <span class="text-lg">%</span></h2>
+          </div>
+          <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400">
+            <i class="fa-solid fa-droplet text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">ความชื้นในดิน (Soil Moisture)</p>
+            <h2 class="text-3xl font-extrabold text-cyan-400 mt-1" id="val-soil">-- <span class="text-lg">%</span></h2>
+          </div>
+          <div class="p-3 bg-cyan-500/10 rounded-lg text-cyan-400">
+            <i class="fa-solid fa-water text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">ความเข้มแสง (Light Lux)</p>
+            <h2 class="text-3xl font-extrabold text-yellow-400 mt-1" id="val-light">-- <span class="text-lg">Lux</span></h2>
+          </div>
+          <div class="p-3 bg-yellow-500/10 rounded-lg text-yellow-400">
+            <i class="fa-solid fa-sun text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">กรด-ด่างดิน (pH Level)</p>
+            <h2 class="text-3xl font-extrabold text-purple-400 mt-1" id="val-ph">--</h2>
+          </div>
+          <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400">
+            <i class="fa-solid fa-flask text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">สถานะระบบ (Status)</p>
+            <h2 class="text-2xl font-extrabold mt-1 text-emerald-400" id="val-status">NORMAL</h2>
+          </div>
+          <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
+            <i class="fa-solid fa-shield-halved text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-800/80 rounded-xl p-6 border border-slate-700 shadow-xl">
+      <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-chart-line text-emerald-400"></i> แนวโน้มข้อมูลแบบ Real-time
+      </h3>
+      <div class="h-72">
+        <canvas id="realtimeChart"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      databaseURL: "https://iot-124-b5377-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const ctx = document.getElementById('realtimeChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Temperature (°C)',
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            data: [],
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Humidity (%)',
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            data: [],
+            tension: 0.3,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+          y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+        },
+        plugins: {
+          legend: { labels: { color: '#e2e8f0' } }
+        }
+      }
+    });
+
+    db.ref('latest').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      document.getElementById('val-temp').innerHTML = `${data.temperature?.toFixed(1) || '--'} <span class="text-lg">°C</span>`;
+      document.getElementById('val-hum').innerHTML = `${data.humidity?.toFixed(1) || '--'} <span class="text-lg">%</span>`;
+      document.getElementById('val-soil').innerHTML = `${data.soil_moisture?.toFixed(0) || '--'} <span class="text-lg">%</span>`;
+      document.getElementById('val-light').innerHTML = `${data.light_lux?.toFixed(0) || '--'} <span class="text-lg">Lux</span>`;
+      document.getElementById('val-ph').innerText = data.ph_level?.toFixed(1) || '--';
+
+      const statusEl = document.getElementById('val-status');
+      statusEl.innerText = data.system_status || 'NORMAL';
+      statusEl.className = data.system_status === 'WARNING' 
+        ? 'text-2xl font-extrabold mt-1 text-rose-500 animate-pulse' 
+        : 'text-2xl font-extrabold mt-1 text-emerald-400';
+
+      const now = new Date();
+      document.getElementById('last-update').innerText = `อัปเดตล่าสุด: ${now.toLocaleTimeString('th-TH')}`;
+
+      const timeLabel = now.toLocaleTimeString('th-TH');
+      if (chart.data.labels.length > 10) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+        chart.data.datasets[1].data.shift();
+      }
+      chart.data.labels.push(timeLabel);
+      chart.data.datasets[0].data.push(data.temperature);
+      chart.data.datasets[1].data.push(data.humidity);
+      chart.update();
+    });
+  </script>
+</body>
+</html>
