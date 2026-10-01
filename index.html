@@ -1,338 +1,339 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Farm Cybernetic Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Farm Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#06110f; --text:#eef7f2; --muted:#93b1a5; --ok:#5eead4; --warn:#fbbf24; --bad:#fb7185;
+  --b1:#0f9d8a; --b2:#3b82f6; --b3:#84cc16;
+  --glass:rgba(255,255,255,.055); --edge:rgba(255,255,255,.11);
+}
+body[data-state="warn"]{--b1:#d97706;--b2:#f59e0b;--b3:#b45309}
+body[data-state="bad"]{--b1:#e11d48;--b2:#f97316;--b3:#9f1239}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',system-ui,sans-serif;min-height:100vh;
+  padding:28px clamp(16px,4vw,56px) 56px;font-variant-numeric:tabular-nums;overflow-x:hidden;position:relative}
+:focus-visible{outline:2px solid var(--ok);outline-offset:3px}
 
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #030712;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
-        radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
-      background-attachment: fixed;
-    }
-    .font-num { font-family: 'Space Grotesk', sans-serif; }
-    
-    .cyber-card {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .cyber-card:hover {
-      transform: translateY(-4px) scale(1.01);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Neon Glow Effect */
-    .glow-amber { text-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
-    .glow-blue { text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-    .glow-emerald { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
-    .glow-purple { text-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
-    
-    .box-glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
-    .box-glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
-  </style>
+/* พื้นหลังแสงออโรร่า เปลี่ยนสีตามสถานะ */
+.aura{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aura i{position:absolute;border-radius:50%;filter:blur(110px);opacity:.5;transition:background 1.5s}
+.aura i:nth-child(1){width:48vw;height:48vw;left:-12vw;top:-14vw;background:var(--b1)}
+.aura i:nth-child(2){width:42vw;height:42vw;right:-10vw;top:10vh;background:var(--b2);opacity:.38}
+.aura i:nth-child(3){width:40vw;height:40vw;left:25vw;bottom:-22vw;background:var(--b3);opacity:.3}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;display:grid;gap:18px}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;font-family:Prompt,sans-serif}
+.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:19px;color:#052e26;
+  background:linear-gradient(135deg,#a7f3d0,#5eead4 55%,#67e8f9)}
+.brand b{font-weight:700;font-size:19px;display:block;line-height:1.2}
+.brand span{font-weight:300;font-size:13px;color:var(--muted)}
+.conn{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);background:var(--glass);
+  border:1px solid var(--edge);padding:8px 16px;border-radius:999px;backdrop-filter:blur(14px)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.conn.live .dot{background:var(--ok);animation:pulse 2s infinite}
+.conn.stale .dot{background:var(--warn)}.conn.off .dot{background:var(--bad)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(94,234,212,.6)}100%{box-shadow:0 0 0 10px rgba(94,234,212,0)}}
+
+/* bento */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.g{background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:24px;padding:22px;position:relative;overflow:hidden;
+  box-shadow:0 20px 50px -25px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+.hero{grid-column:span 8;grid-row:span 2;border-radius:32px;padding:32px;min-height:420px;display:flex;flex-direction:column}
+.ring-card{grid-column:span 4}
+.third{grid-column:span 4}
+.wide{grid-column:span 12}
+@media(max-width:1000px){.hero{grid-column:span 12}.ring-card,.third{grid-column:span 6}}
+@media(max-width:620px){.ring-card,.third{grid-column:span 12}.hero{padding:22px}}
+
+/* hero */
+.orb{position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;
+  transition:transform 1.6s,background 1.6s,box-shadow 1.6s,opacity 1.6s;
+  background:radial-gradient(circle at 35% 35%,#fff3c4,#ffb44d 55%,#ff7a3d);
+  box-shadow:0 0 120px 40px rgba(255,170,70,.35);opacity:.9}
+.orb.night{background:radial-gradient(circle at 35% 35%,#fff,#cfdcff 55%,#8ea6ff);box-shadow:0 0 120px 40px rgba(142,166,255,.3)}
+.lbl{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);position:relative}
+.lbl i{color:#fbbf24}
+.big{font-family:Prompt,sans-serif;font-weight:700;line-height:.95;letter-spacing:-.03em;position:relative;
+  font-size:clamp(84px,13vw,168px);margin:14px 0 6px;
+  background:linear-gradient(180deg,#fff 20%,#fcd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.big small{font-size:.32em;font-weight:300;letter-spacing:0;margin-left:6px;-webkit-text-fill-color:var(--muted)}
+.hero h2{font-family:Prompt,sans-serif;font-weight:500;font-size:clamp(20px,2.4vw,28px);position:relative}
+.hero p{color:var(--muted);font-size:14px;margin-top:4px;position:relative}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;position:relative}
+.pill{font-size:13px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--edge)}
+.pill.good{color:var(--ok)}.pill.bad{color:var(--bad);border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.12);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.55}}
+.spark{margin-top:auto;padding-top:20px;position:relative}
+.spark svg{width:100%;height:90px;display:block}
+
+/* ring cards */
+.ring-card,.third{display:flex;flex-direction:column;gap:14px}
+.head{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted)}
+.head i{color:var(--c);width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--c) 16%,transparent)}
+.ringbox{position:relative;width:148px;height:148px;margin:0 auto}
+.ringbox svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringbox .tr{fill:none;stroke:rgba(255,255,255,.08);stroke-width:10}
+.ringbox .fg{fill:none;stroke-width:10;stroke-linecap:round;stroke-dasharray:314.16;stroke-dashoffset:314.16;
+  transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 7px var(--c))}
+.center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:Prompt,sans-serif}
+.center b{font-size:30px;font-weight:700;line-height:1}
+.center span{font-size:13px;color:var(--muted);font-weight:300;margin-top:3px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.chip{font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px}
+.chip.ok{background:rgba(94,234,212,.15);color:var(--ok)}
+.chip.low{background:rgba(103,180,255,.16);color:#7cc0ff}
+.chip.high{background:rgba(251,113,133,.16);color:var(--bad)}
+.chip.none{background:rgba(255,255,255,.07);color:var(--muted)}
+
+/* chart + log */
+.g h3{font-family:Prompt,sans-serif;font-weight:500;font-size:17px}
+.sub{font-size:12px;color:var(--muted);margin:2px 0 14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{font:inherit;font-size:13px;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--edge);
+  padding:6px 14px;border-radius:999px;cursor:pointer;transition:.2s}
+.tab:hover{color:var(--text)}
+.tab[aria-pressed="true"]{color:#04201a;background:linear-gradient(135deg,#a7f3d0,#5eead4);border-color:transparent;font-weight:600}
+.chart{height:300px}
+.log{list-style:none;padding:0;display:grid;gap:12px;max-height:230px;overflow:auto}
+.log li{display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:13px}
+.log time{color:var(--muted);font-size:12px}
+.log .empty{display:block;color:var(--muted)}
+.tag{width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--ok)}
+.tag.low{background:#7cc0ff}.tag.high{background:var(--bad)}.tag.warn{background:var(--warn)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
-<body class="text-slate-100 min-h-screen p-4 md:p-8">
+<body data-state="ok">
+<div class="aura"><i></i><i></i><i></i></div>
+<div class="wrap">
 
-  <!-- Header -->
-  <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
-    <div class="flex items-center gap-4">
-      <div class="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 box-glow-emerald">
-        <i class="fa-solid fa-microchip text-3xl animate-pulse"></i>
-      </div>
-      <div>
-        <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
-          SMART FARM <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">PRO NEXUS</span>
-        </h1>
-        <p class="text-slate-400 text-xs md:text-sm mt-1">ระบบวิเคราะห์และควบคุมฟาร์มอัจฉริยะแบบเรียลไทม์</p>
-      </div>
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><i class="fa-solid fa-seedling"></i></div>
+      <div><b>Smart Farm</b><span>เฝ้าดูฟาร์มแบบเรียลไทม์</span></div>
     </div>
-    
-    <div class="flex items-center gap-3 bg-slate-900/80 border border-emerald-500/30 px-5 py-2.5 rounded-full backdrop-blur-xl">
-      <span class="relative flex h-3 w-3">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-      </span>
-      <span class="text-xs text-emerald-300 font-mono tracking-wider" id="last-update">CONNECTING...</span>
-    </div>
+    <div class="conn" id="conn"><span class="dot"></span><span id="conn-text">กำลังเชื่อมต่อ...</span></div>
   </header>
 
-  <main class="max-w-7xl mx-auto space-y-6">
-    
-    <!-- Top Stats Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      
-      <!-- Temperature -->
-      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
-        <div class="absolute -right-6 -bottom-6 text-amber-500/5 text-9xl font-bold">°C</div>
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-xs font-bold tracking-widest uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">Temperature</span>
-            <div class="flex items-baseline gap-2 mt-4">
-              <h2 class="text-4xl font-black text-amber-400 font-num glow-amber" id="val-temp">--</h2>
-              <span class="text-lg text-slate-400 font-bold">°C</span>
-            </div>
-          </div>
-          <div class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-400 box-glow-amber">
-            <i class="fa-solid fa-temperature-arrow-up text-2xl"></i>
-          </div>
-        </div>
+  <main class="grid">
+
+    <section class="g hero" aria-live="polite">
+      <div class="orb" id="orb"></div>
+      <div class="lbl"><i class="fa-solid fa-temperature-half"></i> อุณหภูมิในฟาร์มตอนนี้</div>
+      <div class="big" id="v-temperature">--<small>°C</small></div>
+      <h2 id="sum-title">กำลังรอข้อมูลจากเซนเซอร์</h2>
+      <p id="sum-sub">ข้อมูลจะแสดงทันทีที่ระบบส่งค่าแรกเข้ามา</p>
+      <div class="pills">
+        <span class="pill" id="sys-pill">สถานะระบบ: <b id="val-status">--</b></span>
+        <span class="pill" id="temp-pill">อุณหภูมิ: --</span>
+        <span class="pill" id="light-pill">แสง: --</span>
       </div>
+      <div class="spark"><svg id="spark" viewBox="0 0 400 90" preserveAspectRatio="none"></svg></div>
+    </section>
 
-      <!-- Humidity -->
-      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
-        <div class="absolute -right-6 -bottom-6 text-blue-500/5 text-9xl font-bold">%</div>
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-xs font-bold tracking-widest uppercase text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full">Humidity</span>
-            <div class="flex items-baseline gap-2 mt-4">
-              <h2 class="text-4xl font-black text-blue-400 font-num glow-blue" id="val-hum">--</h2>
-              <span class="text-lg text-slate-400 font-bold">%</span>
-            </div>
-          </div>
-          <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-blue-400">
-            <i class="fa-solid fa-droplet text-2xl"></i>
-          </div>
-        </div>
-      </div>
+    <div class="g ring-card" id="card-soil_moisture"></div>
+    <div class="g ring-card" id="card-light_lux"></div>
+    <div class="g third" id="card-humidity"></div>
+    <div class="g third" id="card-ph_level"></div>
 
-      <!-- Soil Moisture -->
-      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-xs font-bold tracking-widest uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">Soil Moisture</span>
-            <div class="flex items-baseline gap-2 mt-4">
-              <h2 class="text-4xl font-black text-emerald-400 font-num glow-emerald" id="val-soil">--</h2>
-              <span class="text-lg text-slate-400 font-bold">%</span>
-            </div>
-          </div>
-          <div class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 box-glow-emerald">
-            <i class="fa-solid fa-seedling text-2xl"></i>
-          </div>
-        </div>
-        <div class="mt-4">
-          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5 border border-slate-700">
-            <div id="bar-soil" class="bg-gradient-to-r from-emerald-500 to-teal-300 h-full rounded-full transition-all duration-700 w-0"></div>
-          </div>
-        </div>
-      </div>
+    <section class="g third">
+      <h3>บันทึกเหตุการณ์</h3>
+      <p class="sub">แจ้งเมื่อค่าออกนอกหรือกลับเข้าช่วงที่เหมาะสม</p>
+      <ul class="log" id="log"><li class="empty">ยังไม่มีเหตุการณ์</li></ul>
+    </section>
 
-      <!-- Light Lux -->
-      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-xs font-bold tracking-widest uppercase text-yellow-300 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full">Light Intensity</span>
-            <div class="flex items-baseline gap-2 mt-4">
-              <h2 class="text-4xl font-black text-yellow-300 font-num" id="val-light">--</h2>
-              <span class="text-lg text-slate-400 font-bold">Lux</span>
-            </div>
-          </div>
-          <div class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-yellow-300">
-            <i class="fa-solid fa-sun text-2xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- pH Level -->
-      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-xs font-bold tracking-widest uppercase text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full">Soil pH</span>
-            <div class="flex items-baseline gap-2 mt-4">
-              <h2 class="text-4xl font-black text-purple-400 font-num glow-purple" id="val-ph">--</h2>
-              <span class="text-xs text-purple-300 font-bold uppercase" id="status-ph">pH Level</span>
-            </div>
-          </div>
-          <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl text-purple-400">
-            <i class="fa-solid fa-flask-vial text-2xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- System Control Node -->
-      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group border-emerald-500/40">
-        <div class="flex justify-between items-center mb-4">
-          <span class="text-xs font-bold tracking-widest uppercase text-slate-300 bg-slate-800 px-3 py-1 rounded-full">Node Status</span>
-          <div class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400" id="icon-status">
-            <i class="fa-solid fa-shield-check text-xl"></i>
-          </div>
-        </div>
-        <h3 class="text-2xl font-black text-emerald-400 tracking-wider font-num" id="val-status">ONLINE</h3>
-        <p class="text-xs text-slate-400 mt-2">อัตราการส่งข้อมูล: <span class="text-emerald-400">3 วินาที/ครั้ง</span></p>
-      </div>
-
-    </div>
-
-    <!-- Analytics Chart & Quick Control Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Chart Section -->
-      <div class="cyber-card rounded-3xl p-6 lg:col-span-2">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h3 class="text-xl font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-chart-line text-emerald-400"></i> Real-time Analytics
-            </h3>
-            <p class="text-xs text-slate-400 mt-1">กราฟแสดงผลอุณหภูมิและความชื้นสัมพัทธ์</p>
-          </div>
-        </div>
-        <div class="h-80 w-full">
-          <canvas id="realtimeChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Interactive Control Panel -->
-      <div class="cyber-card rounded-3xl p-6 flex flex-col justify-between">
-        <div>
-          <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
-            <i class="fa-solid fa-sliders text-teal-400"></i> Smart Controls
-          </h3>
-          <p class="text-xs text-slate-400 mb-6">สวิตช์ควบคุมระบบอัตโนมัติ</p>
-
-          <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
-              <div class="flex items-center gap-3">
-                <i class="fa-solid fa-faucet-drip text-cyan-400 text-lg"></i>
-                <div>
-                  <p class="text-sm font-bold text-slate-200">ระบบรดน้ำอัตโนมัติ</p>
-                  <p class="text-[10px] text-slate-400">ทำงานเมื่อความชื้น < 40%</p>
-                </div>
-              </div>
-              <span class="px-3 py-1 text-xs font-bold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">AUTO</span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
-              <div class="flex items-center gap-3">
-                <i class="fa-solid fa-fan text-amber-400 text-lg"></i>
-                <div>
-                  <p class="text-sm font-bold text-slate-200">พัดลมระบายความร้อน</p>
-                  <p class="text-[10px] text-slate-400">ทำงานเมื่ออุณหภูมิ > 33°C</p>
-                </div>
-              </div>
-              <span class="px-3 py-1 text-xs font-bold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">AUTO</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 p-4 bg-gradient-to-r from-emerald-950/40 to-teal-950/40 rounded-2xl border border-emerald-500/20">
-          <p class="text-xs text-emerald-300 font-medium"><i class="fa-solid fa-circle-info mr-1"></i> AI Optimization</p>
-          <p class="text-[11px] text-slate-400 mt-1">ระบบกำลังรักษาระดับสภาพแวดล้อมให้อยู่ในเกณฑ์สมบูรณ์แบบ</p>
-        </div>
-      </div>
-
-    </div>
+    <section class="g wide">
+      <h3>แนวโน้มค่าล่าสุด</h3>
+      <p class="sub">เส้นประคือช่วงที่เหมาะสม</p>
+      <div class="tabs" id="tabs" role="group" aria-label="เลือกค่าที่ต้องการดู"></div>
+      <div class="chart"><canvas id="realtimeChart"></canvas></div>
+    </section>
 
   </main>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      databaseURL: "https://iot-124-b5377-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+<script>
+/* ---------- ตั้งค่าเซนเซอร์ (แก้ช่วง lo/hi ให้ตรงกับพืชของคุณ) ---------- */
+const METRICS = [
+  { key:'temperature',  label:'อุณหภูมิ',      unit:'°C',  dec:1, min:0, max:50,     lo:20,   hi:32,    color:'#fbbf24', icon:'fa-temperature-half' },
+  { key:'humidity',     label:'ความชื้นอากาศ', unit:'%',   dec:1, min:0, max:100,    lo:50,   hi:80,    color:'#67e8f9', icon:'fa-droplet' },
+  { key:'soil_moisture',label:'ความชื้นในดิน', unit:'%',   dec:0, min:0, max:100,    lo:40,   hi:70,    color:'#5eead4', icon:'fa-seedling' },
+  { key:'light_lux',    label:'ความเข้มแสง',   unit:'Lux', dec:0, min:0, max:100000, lo:5000, hi:60000, color:'#fde047', icon:'fa-sun' },
+  { key:'ph_level',     label:'ค่า pH ของดิน', unit:'',    dec:1, min:0, max:14,     lo:5.5,  hi:7,     color:'#c4b5fd', icon:'fa-flask' }
+];
+const M = Object.fromEntries(METRICS.map(m => [m.key, m]));
+const MAX_POINTS = 30, STALE_MS = 30000, CIRC = 314.16;
+const fmt = (m, v) => Number(v).toLocaleString('th-TH', { minimumFractionDigits:m.dec, maximumFractionDigits:m.dec });
+const clock = d => d.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+const statusOf = (m, v) => v < m.lo ? 'low' : v > m.hi ? 'high' : 'ok';
+const TXT = { ok:'เหมาะสม', low:'ต่ำกว่าเกณฑ์', high:'สูงกว่าเกณฑ์' };
+const $ = id => document.getElementById(id);
 
-    // Chart Configuration
-    const ctx = document.getElementById('realtimeChart').getContext('2d');
-    
-    const gradTemp = ctx.createLinearGradient(0, 0, 0, 300);
-    gradTemp.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
-    gradTemp.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+/* ---------- การ์ดวงแหวน ---------- */
+METRICS.filter(m => m.key !== 'temperature').forEach(m => {
+  $('card-' + m.key).style.setProperty('--c', m.color);
+  $('card-' + m.key).innerHTML = `
+    <div class="head"><span>${m.label}</span><i class="fa-solid ${m.icon}"></i></div>
+    <div class="ringbox">
+      <svg viewBox="0 0 120 120"><circle class="tr" cx="60" cy="60" r="50"/><circle class="fg" id="r-${m.key}" cx="60" cy="60" r="50" stroke="${m.color}"/></svg>
+      <div class="center"><b id="v-${m.key}">--</b><span>${m.unit || 'pH'}</span></div>
+    </div>
+    <div class="foot"><span class="chip none" id="c-${m.key}">--</span><span>ช่วงเหมาะสม ${m.lo.toLocaleString('th-TH')}–${m.hi.toLocaleString('th-TH')}</span></div>`;
+});
 
-    const gradHum = ctx.createLinearGradient(0, 0, 0, 300);
-    gradHum.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
-    gradHum.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+/* ---------- กราฟ ---------- */
+const history = {}; METRICS.forEach(m => history[m.key] = []);
+const labels = [];
+let active = METRICS[0];
+$('tabs').innerHTML = METRICS.map(m => `<button class="tab" data-k="${m.key}" aria-pressed="${m===active}">${m.label}</button>`).join('');
+$('tabs').addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if (!b) return;
+  active = M[b.dataset.k];
+  $('tabs').querySelectorAll('.tab').forEach(t => t.setAttribute('aria-pressed', t === b));
+  refreshChart();
+});
+Chart.defaults.font.family = "'IBM Plex Sans Thai',sans-serif";
+const chart = new Chart($('realtimeChart').getContext('2d'), {
+  type:'line',
+  data:{ labels, datasets:[
+    { label:'ค่าที่วัดได้', data:[], borderWidth:3, tension:.4, pointRadius:0, pointHoverRadius:5, fill:true },
+    { label:'ขั้นต่ำ', data:[], borderWidth:1, borderDash:[6,6], pointRadius:0, borderColor:'rgba(255,255,255,.3)' },
+    { label:'ขั้นสูง', data:[], borderWidth:1, borderDash:[6,6], pointRadius:0, borderColor:'rgba(255,255,255,.3)' }
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false, animation:{ duration:500 },
+    interaction:{ mode:'index', intersect:false },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ color:'#93b1a5', maxTicksLimit:7 }, border:{ display:false } },
+      y:{ grid:{ color:'rgba(255,255,255,.06)' }, ticks:{ color:'#93b1a5' }, border:{ display:false } }
+    },
+    plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'rgba(6,17,15,.92)', borderColor:'rgba(255,255,255,.15)', borderWidth:1, padding:10 } }
+  }
+});
+function refreshChart(){
+  const m = active, ds = chart.data.datasets, ca = chart.chartArea;
+  ds[0].data = history[m.key].slice();
+  ds[0].borderColor = m.color;
+  if (ca){
+    const g = chart.ctx.createLinearGradient(0, ca.top, 0, ca.bottom);
+    g.addColorStop(0, m.color + '66'); g.addColorStop(1, m.color + '00');
+    ds[0].backgroundColor = g;
+  }
+  ds[1].data = labels.map(() => m.lo);
+  ds[2].data = labels.map(() => m.hi);
+  chart.update();
+}
 
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: 'Temperature (°C)',
-            borderColor: '#f59e0b',
-            backgroundColor: gradTemp,
-            borderWidth: 3,
-            pointBackgroundColor: '#f59e0b',
-            pointBorderColor: '#030712',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            data: [],
-            tension: 0.4,
-            fill: true
-          },
-          {
-            label: 'Humidity (%)',
-            borderColor: '#3b82f6',
-            backgroundColor: gradHum,
-            borderWidth: 3,
-            pointBackgroundColor: '#3b82f6',
-            pointBorderColor: '#030712',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            data: [],
-            tension: 0.4,
-            fill: true
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#64748b' } },
-          y: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#64748b' } }
-        },
-        plugins: {
-          legend: { position: 'top', align: 'end', labels: { color: '#94a3b8', usePointStyle: true } }
-        }
-      }
-    });
+/* ---------- เส้นกราฟเล็กในการ์ดหลัก ---------- */
+function drawSpark(){
+  const pts = history.temperature.filter(v => v !== null);
+  if (pts.length < 2) return;
+  const lo = Math.min(...pts), hi = Math.max(...pts), span = (hi - lo) || 1;
+  const xy = pts.map((v, i) => [i / (pts.length - 1) * 400, 78 - (v - lo) / span * 64]);
+  const line = xy.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  $('spark').innerHTML = `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbbf24" stop-opacity=".45"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0"/></linearGradient></defs>
+    <path d="${line} L400 90 L0 90Z" fill="url(#sg)"/><path d="${line}" fill="none" stroke="#fbbf24" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
+}
 
-    // Realtime Data Sync
-    db.ref('latest').on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (!data) return;
+/* ---------- ตัวเลขวิ่ง ---------- */
+let shown = null;
+function countTo(m, to){
+  const el = $('v-' + m.key), from = shown === null ? to : shown; shown = to;
+  const t0 = performance.now();
+  (function step(t){
+    const k = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - k, 3);
+    el.innerHTML = `${fmt(m, from + (to - from) * e)}<small>°C</small>`;
+    if (k < 1) requestAnimationFrame(step);
+  })(t0);
+}
 
-      document.getElementById('val-temp').innerText = data.temperature?.toFixed(1) || '--';
-      document.getElementById('val-hum').innerText = data.humidity?.toFixed(1) || '--';
-      document.getElementById('val-soil').innerText = data.soil_moisture?.toFixed(0) || '--';
-      document.getElementById('val-light').innerText = data.light_lux?.toFixed(0) || '--';
-      document.getElementById('val-ph').innerText = data.ph_level?.toFixed(1) || '--';
+/* ---------- บันทึกเหตุการณ์ ---------- */
+const logEl = $('log'); let logCount = 0;
+function addLog(kind, text){
+  if (!logCount) logEl.innerHTML = '';
+  logCount++;
+  const li = document.createElement('li');
+  li.innerHTML = `<span class="tag ${kind}"></span><div>${text}<br><time>${clock(new Date())}</time></div>`;
+  logEl.prepend(li);
+  while (logEl.children.length > 12) logEl.lastChild.remove();
+}
 
-      // Soil Progress Bar
-      const soilVal = data.soil_moisture || 0;
-      document.getElementById('bar-soil').style.width = `${Math.min(soilVal, 100)}%`;
+/* ---------- Firebase (เหมือนเดิม) ---------- */
+firebase.initializeApp({ databaseURL:"https://iot-124-b5377-default-rtdb.asia-southeast1.firebasedatabase.app" });
+const db = firebase.database();
+let lastTs = 0;
+const setConn = (cls, text) => { $('conn').className = 'conn ' + cls; $('conn-text').textContent = text; };
+db.ref('.info/connected').on('value', s => { if (!s.val()) setConn('off','ขาดการเชื่อมต่อ'); else if (!lastTs) setConn('stale','เชื่อมต่อแล้ว รอข้อมูล'); });
+setInterval(() => { if (lastTs && Date.now() - lastTs > STALE_MS) setConn('stale', 'ไม่มีข้อมูลใหม่ · ล่าสุด ' + clock(new Date(lastTs))); }, 5000);
 
-      // Time Stamp
-      const now = new Date();
-      document.getElementById('last-update').innerText = `UPDATED: ${now.toLocaleTimeString('th-TH')}`;
+const prevStatus = {}; let prevSys = null;
 
-      // Chart Update
-      const timeLabel = now.toLocaleTimeString('th-TH');
-      if (chart.data.labels.length > 10) {
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-        chart.data.datasets[1].data.shift();
-      }
-      chart.data.labels.push(timeLabel);
-      chart.data.datasets[0].data.push(data.temperature);
-      chart.data.datasets[1].data.push(data.humidity);
-      chart.update();
-    });
-  </script>
+db.ref('latest').on('value', snap => {
+  const data = snap.val(); if (!data) return;
+  const now = new Date(); lastTs = now.getTime();
+  setConn('live', 'ออนไลน์ · อัปเดต ' + clock(now));
+  const issues = [];
+  labels.push(clock(now)); if (labels.length > MAX_POINTS) labels.shift();
+
+  METRICS.forEach(m => {
+    const v = Number(data[m.key]), ok = data[m.key] !== undefined && data[m.key] !== null && !isNaN(v);
+    const h = history[m.key]; h.push(ok ? v : null); if (h.length > MAX_POINTS) h.shift();
+    if (!ok) return;
+    const st = statusOf(m, v);
+
+    if (m.key === 'temperature'){
+      countTo(m, v);
+      $('temp-pill').textContent = 'อุณหภูมิ: ' + TXT[st];
+    } else {
+      $('v-' + m.key).textContent = fmt(m, v);
+      const pct = Math.min(1, Math.max(0, (v - m.min) / (m.max - m.min)));
+      $('r-' + m.key).style.strokeDashoffset = CIRC * (1 - pct);
+      const chip = $('c-' + m.key); chip.className = 'chip ' + st; chip.textContent = TXT[st];
+    }
+    if (m.key === 'light_lux'){
+      const pct = Math.min(1, v / 60000), orb = $('orb');
+      orb.classList.toggle('night', v < m.lo);
+      orb.style.transform = `scale(${0.7 + pct * 0.5})`;
+      orb.style.opacity = v < m.lo ? 0.55 : 0.6 + pct * 0.4;
+      $('light-pill').textContent = v < m.lo ? 'แสง: ค่อนข้างมืด' : 'แสง: ' + TXT[st];
+    }
+
+    if (st !== 'ok') issues.push(m.label);
+    if (prevStatus[m.key] !== undefined && prevStatus[m.key] !== st)
+      addLog(st, st === 'ok' ? `${m.label} กลับเข้าช่วงที่เหมาะสม (${fmt(m, v)} ${m.unit})` : `${m.label} ${TXT[st]} (${fmt(m, v)} ${m.unit})`);
+    prevStatus[m.key] = st;
+  });
+
+  const sys = data.system_status || 'NORMAL', warn = sys === 'WARNING';
+  $('val-status').textContent = sys;
+  $('sys-pill').className = 'pill ' + (warn ? 'bad' : 'good');
+  if (prevSys !== null && prevSys !== sys) addLog(warn ? 'warn' : 'ok', warn ? 'ระบบแจ้งเตือน WARNING' : 'ระบบกลับสู่สถานะ NORMAL');
+  prevSys = sys;
+
+  document.body.dataset.state = warn ? 'bad' : issues.length ? 'warn' : 'ok';
+  if (warn || issues.length){
+    $('sum-title').textContent = issues.length ? `มี ${issues.length} ค่าที่ควรตรวจสอบ` : 'ระบบแจ้งเตือนผิดปกติ';
+    $('sum-sub').textContent = issues.length ? 'ออกนอกช่วงที่เหมาะสม: ' + issues.join(', ') : 'ค่าเซนเซอร์ปกติ แต่ระบบส่งสถานะ WARNING';
+  } else {
+    $('sum-title').textContent = 'ทุกค่าอยู่ในเกณฑ์ที่เหมาะสม';
+    $('sum-sub').textContent = 'ฟาร์มทำงานปกติ ไม่มีรายการที่ต้องดำเนินการ';
+  }
+  drawSpark();
+  refreshChart();
+});
+</script>
 </body>
 </html>
