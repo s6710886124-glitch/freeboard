@@ -3,187 +3,237 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Farm Executive Dashboard</title>
+  <title>Smart Farm Cybernetic Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
-      background: radial-gradient(circle at top right, #0f172a, #020617);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #030712;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
     }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.45);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    .font-num { font-family: 'Space Grotesk', sans-serif; }
+    
+    .cyber-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .glass-card:hover {
-      border-color: rgba(255, 255, 255, 0.18);
-      transform: translateY(-2px);
-      transition: all 0.3s ease;
+    .cyber-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(255, 255, 255, 0.2);
     }
+    
+    /* Neon Glow Effect */
+    .glow-amber { text-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+    .glow-blue { text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+    .glow-emerald { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+    .glow-purple { text-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+    
+    .box-glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
+    .box-glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen p-4 md:p-8">
 
   <!-- Header -->
   <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
-    <div>
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
-          <i class="fa-solid fa-leaf text-2xl"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-            SMART FARM <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">MONITORING</span>
-          </h1>
-          <p class="text-slate-400 text-xs md:text-sm mt-0.5">ระบบเฝ้าระวังและวิเคราะห์สภาพแวดล้อมทางการเกษตรแบบ Real-time</p>
-        </div>
+    <div class="flex items-center gap-4">
+      <div class="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 box-glow-emerald">
+        <i class="fa-solid fa-microchip text-3xl animate-pulse"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
+          SMART FARM <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">PRO NEXUS</span>
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm mt-1">ระบบวิเคราะห์และควบคุมฟาร์มอัจฉริยะแบบเรียลไทม์</p>
       </div>
     </div>
     
-    <div class="flex items-center gap-3 bg-slate-800/60 border border-slate-700/60 px-4 py-2 rounded-full backdrop-blur-md">
-      <span class="relative flex h-2.5 w-2.5">
+    <div class="flex items-center gap-3 bg-slate-900/80 border border-emerald-500/30 px-5 py-2.5 rounded-full backdrop-blur-xl">
+      <span class="relative flex h-3 w-3">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
       </span>
-      <span class="text-xs text-slate-300 font-mono" id="last-update">กำลังเชื่อมต่อข้อมูล...</span>
+      <span class="text-xs text-emerald-300 font-mono tracking-wider" id="last-update">CONNECTING...</span>
     </div>
   </header>
 
-  <!-- Main Grid -->
   <main class="max-w-7xl mx-auto space-y-6">
     
-    <!-- Sensor Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <!-- Top Stats Bar -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       
       <!-- Temperature -->
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+        <div class="absolute -right-6 -bottom-6 text-amber-500/5 text-9xl font-bold">°C</div>
         <div class="flex justify-between items-start">
           <div>
-            <span class="text-[11px] font-bold tracking-wider uppercase text-amber-400/80 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">Temperature</span>
-            <h3 class="text-3xl font-extrabold text-white mt-3" id="val-temp">-- <span class="text-base font-normal text-slate-400">°C</span></h3>
+            <span class="text-xs font-bold tracking-widest uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">Temperature</span>
+            <div class="flex items-baseline gap-2 mt-4">
+              <h2 class="text-4xl font-black text-amber-400 font-num glow-amber" id="val-temp">--</h2>
+              <span class="text-lg text-slate-400 font-bold">°C</span>
+            </div>
           </div>
-          <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-temperature-half text-xl"></i>
+          <div class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-400 box-glow-amber">
+            <i class="fa-solid fa-temperature-arrow-up text-2xl"></i>
           </div>
-        </div>
-        <div class="mt-4 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs text-slate-400">
-          <span>สถานะอุณหภูมิ</span>
-          <span class="text-amber-400 font-medium" id="status-temp">ปกติ</span>
         </div>
       </div>
 
-      <!-- Air Humidity -->
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+      <!-- Humidity -->
+      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+        <div class="absolute -right-6 -bottom-6 text-blue-500/5 text-9xl font-bold">%</div>
         <div class="flex justify-between items-start">
           <div>
-            <span class="text-[11px] font-bold tracking-wider uppercase text-blue-400/80 bg-blue-400/10 px-2.5 py-1 rounded-md border border-blue-400/20">Air Humidity</span>
-            <h3 class="text-3xl font-extrabold text-white mt-3" id="val-hum">-- <span class="text-base font-normal text-slate-400">%</span></h3>
+            <span class="text-xs font-bold tracking-widest uppercase text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full">Humidity</span>
+            <div class="flex items-baseline gap-2 mt-4">
+              <h2 class="text-4xl font-black text-blue-400 font-num glow-blue" id="val-hum">--</h2>
+              <span class="text-lg text-slate-400 font-bold">%</span>
+            </div>
           </div>
-          <div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400 group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-droplet text-xl"></i>
+          <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-blue-400">
+            <i class="fa-solid fa-droplet text-2xl"></i>
           </div>
-        </div>
-        <div class="mt-4 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs text-slate-400">
-          <span>ความชื้นสัมพัทธ์</span>
-          <span class="text-blue-400 font-medium" id="status-hum">เหมาะสม</span>
         </div>
       </div>
 
       <!-- Soil Moisture -->
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
         <div class="flex justify-between items-start">
           <div>
-            <span class="text-[11px] font-bold tracking-wider uppercase text-emerald-400/80 bg-emerald-400/10 px-2.5 py-1 rounded-md border border-emerald-400/20">Soil Moisture</span>
-            <h3 class="text-3xl font-extrabold text-white mt-3" id="val-soil">-- <span class="text-base font-normal text-slate-400">%</span></h3>
+            <span class="text-xs font-bold tracking-widest uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">Soil Moisture</span>
+            <div class="flex items-baseline gap-2 mt-4">
+              <h2 class="text-4xl font-black text-emerald-400 font-num glow-emerald" id="val-soil">--</h2>
+              <span class="text-lg text-slate-400 font-bold">%</span>
+            </div>
           </div>
-          <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-plant-wilt text-xl"></i>
+          <div class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 box-glow-emerald">
+            <i class="fa-solid fa-seedling text-2xl"></i>
           </div>
         </div>
-        <!-- Progress Bar สำหรับความชื้นดิน -->
-        <div class="mt-4 pt-3 border-t border-slate-700/40">
-          <div class="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden">
-            <div id="bar-soil" class="bg-emerald-400 h-full w-0 transition-all duration-500"></div>
+        <div class="mt-4">
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5 border border-slate-700">
+            <div id="bar-soil" class="bg-gradient-to-r from-emerald-500 to-teal-300 h-full rounded-full transition-all duration-700 w-0"></div>
           </div>
         </div>
       </div>
 
       <!-- Light Lux -->
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
         <div class="flex justify-between items-start">
           <div>
-            <span class="text-[11px] font-bold tracking-wider uppercase text-yellow-400/80 bg-yellow-400/10 px-2.5 py-1 rounded-md border border-yellow-400/20">Light Intensity</span>
-            <h3 class="text-3xl font-extrabold text-white mt-3" id="val-light">-- <span class="text-base font-normal text-slate-400">Lux</span></h3>
+            <span class="text-xs font-bold tracking-widest uppercase text-yellow-300 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full">Light Intensity</span>
+            <div class="flex items-baseline gap-2 mt-4">
+              <h2 class="text-4xl font-black text-yellow-300 font-num" id="val-light">--</h2>
+              <span class="text-lg text-slate-400 font-bold">Lux</span>
+            </div>
           </div>
-          <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400 group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-sun text-xl"></i>
+          <div class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-yellow-300">
+            <i class="fa-solid fa-sun text-2xl"></i>
           </div>
-        </div>
-        <div class="mt-4 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs text-slate-400">
-          <span>แสงสว่าง</span>
-          <span class="text-yellow-400 font-medium">เพียงพอ</span>
         </div>
       </div>
 
       <!-- pH Level -->
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group">
         <div class="flex justify-between items-start">
           <div>
-            <span class="text-[11px] font-bold tracking-wider uppercase text-purple-400/80 bg-purple-400/10 px-2.5 py-1 rounded-md border border-purple-400/20">Soil pH Level</span>
-            <h3 class="text-3xl font-extrabold text-white mt-3" id="val-ph">--</h3>
+            <span class="text-xs font-bold tracking-widest uppercase text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full">Soil pH</span>
+            <div class="flex items-baseline gap-2 mt-4">
+              <h2 class="text-4xl font-black text-purple-400 font-num glow-purple" id="val-ph">--</h2>
+              <span class="text-xs text-purple-300 font-bold uppercase" id="status-ph">pH Level</span>
+            </div>
           </div>
-          <div class="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400 group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-flask text-xl"></i>
+          <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl text-purple-400">
+            <i class="fa-solid fa-flask-vial text-2xl"></i>
           </div>
-        </div>
-        <div class="mt-4 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs text-slate-400">
-          <span>ความเป็นกรด-ด่าง</span>
-          <span class="text-purple-400 font-medium" id="status-ph">กลาง</span>
         </div>
       </div>
 
-      <!-- System Status -->
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group border-emerald-500/30">
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-[11px] font-bold tracking-wider uppercase text-slate-400 bg-slate-700/40 px-2.5 py-1 rounded-md border border-slate-600/30">System Overview</span>
-            <h3 class="text-2xl font-extrabold mt-3 text-emerald-400 flex items-center gap-2" id="val-status">
-              <i class="fa-solid fa-circle-check text-lg"></i> NORMAL
-            </h3>
-          </div>
-          <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
-            <i class="fa-solid fa-microchip text-xl"></i>
+      <!-- System Control Node -->
+      <div class="cyber-card rounded-3xl p-6 relative overflow-hidden group border-emerald-500/40">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-xs font-bold tracking-widest uppercase text-slate-300 bg-slate-800 px-3 py-1 rounded-full">Node Status</span>
+          <div class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400" id="icon-status">
+            <i class="fa-solid fa-shield-check text-xl"></i>
           </div>
         </div>
-        <div class="mt-4 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs text-slate-400">
-          <span>สถานะอุปกรณ์</span>
-          <span class="text-emerald-400 font-medium">ออนไลน์</span>
-        </div>
+        <h3 class="text-2xl font-black text-emerald-400 tracking-wider font-num" id="val-status">ONLINE</h3>
+        <p class="text-xs text-slate-400 mt-2">อัตราการส่งข้อมูล: <span class="text-emerald-400">3 วินาที/ครั้ง</span></p>
       </div>
 
     </div>
 
-    <!-- Analytics Chart Section -->
-    <div class="glass-card rounded-2xl p-6">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-chart-line text-emerald-400"></i> แนวโน้มสถิติแบบ Real-time
-          </h3>
-          <p class="text-slate-400 text-xs mt-1">แสดงผลความเปลี่ยนแปลงย้อนหลัง 10 ช่วงเวลาล่าสุด</p>
+    <!-- Analytics Chart & Quick Control Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Chart Section -->
+      <div class="cyber-card rounded-3xl p-6 lg:col-span-2">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-emerald-400"></i> Real-time Analytics
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">กราฟแสดงผลอุณหภูมิและความชื้นสัมพัทธ์</p>
+          </div>
+        </div>
+        <div class="h-80 w-full">
+          <canvas id="realtimeChart"></canvas>
         </div>
       </div>
-      <div class="h-80 w-full">
-        <canvas id="realtimeChart"></canvas>
+
+      <!-- Interactive Control Panel -->
+      <div class="cyber-card rounded-3xl p-6 flex flex-col justify-between">
+        <div>
+          <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-teal-400"></i> Smart Controls
+          </h3>
+          <p class="text-xs text-slate-400 mb-6">สวิตช์ควบคุมระบบอัตโนมัติ</p>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-faucet-drip text-cyan-400 text-lg"></i>
+                <div>
+                  <p class="text-sm font-bold text-slate-200">ระบบรดน้ำอัตโนมัติ</p>
+                  <p class="text-[10px] text-slate-400">ทำงานเมื่อความชื้น < 40%</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 text-xs font-bold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">AUTO</span>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-fan text-amber-400 text-lg"></i>
+                <div>
+                  <p class="text-sm font-bold text-slate-200">พัดลมระบายความร้อน</p>
+                  <p class="text-[10px] text-slate-400">ทำงานเมื่ออุณหภูมิ > 33°C</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 text-xs font-bold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">AUTO</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-gradient-to-r from-emerald-950/40 to-teal-950/40 rounded-2xl border border-emerald-500/20">
+          <p class="text-xs text-emerald-300 font-medium"><i class="fa-solid fa-circle-info mr-1"></i> AI Optimization</p>
+          <p class="text-[11px] text-slate-400 mt-1">ระบบกำลังรักษาระดับสภาพแวดล้อมให้อยู่ในเกณฑ์สมบูรณ์แบบ</p>
+        </div>
       </div>
+
     </div>
 
   </main>
@@ -195,15 +245,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Chart Configuration with Gradient Fill
+    // Chart Configuration
     const ctx = document.getElementById('realtimeChart').getContext('2d');
     
     const gradTemp = ctx.createLinearGradient(0, 0, 0, 300);
-    gradTemp.addColorStop(0, 'rgba(245, 158, 11, 0.35)');
+    gradTemp.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
     gradTemp.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
 
     const gradHum = ctx.createLinearGradient(0, 0, 0, 300);
-    gradHum.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+    gradHum.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
     gradHum.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
     const chart = new Chart(ctx, {
@@ -215,9 +265,11 @@
             label: 'Temperature (°C)',
             borderColor: '#f59e0b',
             backgroundColor: gradTemp,
-            borderWidth: 2.5,
+            borderWidth: 3,
             pointBackgroundColor: '#f59e0b',
-            pointRadius: 4,
+            pointBorderColor: '#030712',
+            pointBorderWidth: 2,
+            pointRadius: 5,
             data: [],
             tension: 0.4,
             fill: true
@@ -226,9 +278,11 @@
             label: 'Humidity (%)',
             borderColor: '#3b82f6',
             backgroundColor: gradHum,
-            borderWidth: 2.5,
+            borderWidth: 3,
             pointBackgroundColor: '#3b82f6',
-            pointRadius: 4,
+            pointBorderColor: '#030712',
+            pointBorderWidth: 2,
+            pointRadius: 5,
             data: [],
             tension: 0.4,
             fill: true
@@ -239,55 +293,35 @@
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { 
-            grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
-            ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans' } } 
-          },
-          y: { 
-            grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
-            ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans' } } 
-          }
+          x: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#64748b' } },
+          y: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#64748b' } }
         },
         plugins: {
-          legend: { 
-            position: 'top',
-            align: 'end',
-            labels: { color: '#cbd5e1', usePointStyle: true, font: { family: 'Plus Jakarta Sans' } } 
-          }
+          legend: { position: 'top', align: 'end', labels: { color: '#94a3b8', usePointStyle: true } }
         }
       }
     });
 
-    // Realtime Listener
+    // Realtime Data Sync
     db.ref('latest').on('value', (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
 
-      document.getElementById('val-temp').innerHTML = `${data.temperature?.toFixed(1) || '--'} <span class="text-base font-normal text-slate-400">°C</span>`;
-      document.getElementById('val-hum').innerHTML = `${data.humidity?.toFixed(1) || '--'} <span class="text-base font-normal text-slate-400">%</span>`;
-      document.getElementById('val-soil').innerHTML = `${data.soil_moisture?.toFixed(0) || '--'} <span class="text-base font-normal text-slate-400">%</span>`;
-      document.getElementById('val-light').innerHTML = `${data.light_lux?.toFixed(0) || '--'} <span class="text-base font-normal text-slate-400">Lux</span>`;
+      document.getElementById('val-temp').innerText = data.temperature?.toFixed(1) || '--';
+      document.getElementById('val-hum').innerText = data.humidity?.toFixed(1) || '--';
+      document.getElementById('val-soil').innerText = data.soil_moisture?.toFixed(0) || '--';
+      document.getElementById('val-light').innerText = data.light_lux?.toFixed(0) || '--';
       document.getElementById('val-ph').innerText = data.ph_level?.toFixed(1) || '--';
 
-      // Update Soil Moisture Bar Width
+      // Soil Progress Bar
       const soilVal = data.soil_moisture || 0;
       document.getElementById('bar-soil').style.width = `${Math.min(soilVal, 100)}%`;
 
-      // Status Indicator Update
-      const statusEl = document.getElementById('val-status');
-      if (data.system_status === 'WARNING') {
-        statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> WARNING`;
-        statusEl.className = 'text-2xl font-extrabold mt-3 text-rose-500 animate-pulse flex items-center gap-2';
-      } else {
-        statusEl.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i> NORMAL`;
-        statusEl.className = 'text-2xl font-extrabold mt-3 text-emerald-400 flex items-center gap-2';
-      }
-
-      // Update Time
+      // Time Stamp
       const now = new Date();
-      document.getElementById('last-update').innerText = `อัปเดตล่าสุด: ${now.toLocaleTimeString('th-TH')}`;
+      document.getElementById('last-update').innerText = `UPDATED: ${now.toLocaleTimeString('th-TH')}`;
 
-      // Update Chart
+      // Chart Update
       const timeLabel = now.toLocaleTimeString('th-TH');
       if (chart.data.labels.length > 10) {
         chart.data.labels.shift();
